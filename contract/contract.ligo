@@ -1,59 +1,56 @@
-type trusted is address
+type trusted is address;
 
-type amt is nat
+// amount
+type amt is nat;
 
 type account is record [
-    balance : amt;
-    allowances : map (trusted, amt)
+  balance : amt;
+  allowances : map (trusted, amt);
   ]
 
-type storage is
-  record [
-    totalSupply : amt;
-    ledger : big_map (address, account)
-  ]
+type storage is record [
+  owner: address;
+  totalSupply : amt;
+  ledger : big_map (address, account);
+  metadata : big_map (string, bytes);
+]
 
 type return is list (operation) * storage
 
 const noOperations : list (operation) = nil;
 
-// функция transfer получает на вход адрес отправителя, адрес получателя и сумму транзакции
 type transferParams is michelson_pair(address, "from", michelson_pair(address, "to", amt, "value"), "")
-// approve получает адрес пользователя и количество токенов, которые он может отправить с баланса смарт-контракта
 type approveParams is michelson_pair(trusted, "spender", amt, "value")
-// getBallance получает адрес пользователя и прокси-контракта, которому она отправит данные о балансе
 type balanceParams is michelson_pair(address, "owner", contract(amt), "")
-// getAllowance получает адрес пользователя, данные его аккаунта в смарт-контракте и прокси-контракт
 type allowanceParams is michelson_pair(michelson_pair(address, "owner", trusted, "spender"), "", contract(amt), "")
-// totalSupply не использует michelson_pair, потому что первый входящий параметр — пустое значение unit — и так окажется первым после сортировки компилятора Michelson
 type totalSupplyParams is (unit * contract(amt))
 
-
 type entryAction is
-  | Transfer of transferParams
-  | Approve of approveParams
-  | GetBalance of balanceParams
-  | GetAllowance of allowanceParams
-  | GetTotalSupply of totalSupplyParams
+| Transfer of transferParams
+| Approve of approveParams
+| GetBalance of balanceParams
+| GetAllowance of allowanceParams
+| GetTotalSupply of totalSupplyParams
+| Mint of (amt)
+| Burn of (amt)
 
 function getAccount (const addr : address; const s : storage) : account is
   block {
-    var acct : account =
+    var acct : account :=
       record [
         balance = 0n;
-        allowances = (map [] : map (address, amt))
+        allowances = (map [] : map (address, amt));
       ];
-
     case s.ledger[addr] of
       None -> skip
-    | Some(instance) -> acct := instance
+      | Some(instance) -> acct := instance
     end;
   } with acct
 
-function getAllowance (const ownerAccount : account; const spender : address; const s : storage) : amt is
+function getAllowance (const ownerAccount : account; const spender : address; const _s : storage) : amt is
   case ownerAccount.allowances[spender] of
     Some (amt) -> amt
-  | None -> 0n
+    | None -> 0n
   end;
 
 function transfer (const from_ : address; const to_ : address; const value : amt; var s : storage) : return is
@@ -61,7 +58,7 @@ function transfer (const from_ : address; const to_ : address; const value : amt
     var senderAccount : account := getAccount(from_, s);
 
     if senderAccount.balance < value then
-      failwith("NotEnoughBalance")
+      failwith("Source balance is too low")
     else skip;
 
     if from_ =/= Tezos.sender then block {
@@ -83,10 +80,56 @@ function transfer (const from_ : address; const to_ : address; const value : amt
     destAccount.balance := destAccount.balance + value;
 
     s.ledger[to_] := destAccount;
+  } with (noOperations, s)
 
-  }
+function mint (const value : amt ; var s : storage) : return is
+  // If the sender is not the owner fail
+  if sender =/= s.owner then 
+    failwith("You must be the owner of the contract to mint tokens");
+  else 
+    block {
+      var ownerAccount: account := 
+      record [
+        balance = 0n;
+        allowances = (map end : map(address, amt));
+      ];
 
- 	with (noOperations, s)
+      case s.ledger[s.owner] of
+        None -> skip
+        | Some(n) -> ownerAccount := n
+      end;
+
+      // Update the owner balance
+      ownerAccount.balance := ownerAccount.balance + value;
+      s.ledger[s.owner] := ownerAccount;
+      s.totalSupply := abs(s.totalSupply + 1);
+    } with (noOperations, s)
+
+function burn (const value : amt ; var s : storage) : return is
+  // If the sender is not the owner fail
+  if sender =/= s.owner then failwith("You must be the owner of the contract to burn tokens");
+  else block {
+    var ownerAccount: account := record [
+      balance = 0n;
+      allowances = (map end : map(address, amt));
+    ];
+
+    case s.ledger[s.owner] of
+      None -> skip
+      | Some(n) -> ownerAccount := n
+    end;
+
+    // Check that the owner can spend that much
+    if value > ownerAccount.balance then 
+      failwith ("Owner balance is too low");
+    else skip;
+
+    // Update the owner balance
+    // Using the abs function to convert int to nat
+    ownerAccount.balance := abs(ownerAccount.balance - value);
+    s.ledger[s.owner] := ownerAccount;
+    s.totalSupply := abs(s.totalSupply - 1);
+  } with (noOperations, s)
 
 function approve (const spender : address; const value : amt; var s : storage) : return is
   block {
@@ -107,27 +150,31 @@ function approve (const spender : address; const value : amt; var s : storage) :
 function getBalance (const owner : address; const contr : contract(amt); var s : storage) : return is
   block {
     const ownerAccount : account = getAccount(owner, s);
-  }
-  with (list [transaction(ownerAccount.balance, 0tz, contr)], s)
+
+  } with (list [transaction(ownerAccount.balance, 0tz, contr)], s)
 
 function getAllowance (const owner : address; const spender : address; const contr : contract(amt); var s : storage) : return is
   block {
     const ownerAccount : account = getAccount(owner, s);
     const spenderAllowance : amt = getAllowance(ownerAccount, spender, s);
-  } with (list [transaction(spenderAllowance, 0tz, contr)], s)
+
+ } with (list [transaction(spenderAllowance, 0tz, contr)], s)
 
 function getTotalSupply (const contr : contract(amt); var s : storage) : return is
   block {
     skip
   } with (list [transaction(s.totalSupply, 0tz, contr)], s)
 
+(* Главная функция принимает название псевдо-точки входа и ее параметры *)
 function main (const action : entryAction; var s : storage) : return is
-  block {
-    skip
-  } with case action of
+ block {
+   skip
+ } with case action of
     | Transfer(params) -> transfer(params.0, params.1.0, params.1.1, s)
     | Approve(params) -> approve(params.0, params.1, s)
     | GetBalance(params) -> getBalance(params.0, params.1, s)
     | GetAllowance(params) -> getAllowance(params.0.0, params.0.1, params.1, s)
     | GetTotalSupply(params) -> getTotalSupply(params.1, s)
+    | Mint(params) -> mint(params, s)
+    | Burn(params) -> burn(params, s)
   end;

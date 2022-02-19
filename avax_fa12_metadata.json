@@ -1,0 +1,10 @@
+{
+    "symbol": "avax_t",
+    "name": "avax tezos",
+    "decimals": "0",
+    "icon": "",
+    "description": "Wrap avax",
+    "authors": "",
+    "minter": "tz1gDNe8ZTqSJvoJWRdMjKRPU5zMgyBJ6L9M",
+    "interfaces": ["TZIP-007-2021-04-17", "TZIP-016-2021-04-17"]
+  }
