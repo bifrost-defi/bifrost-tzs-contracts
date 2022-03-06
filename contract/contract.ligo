@@ -8,11 +8,19 @@ type account is record [
   allowances : map (trusted, amt);
   ]
 
+type burning is record [
+  user : address;
+  amount: amt;
+  destination: string;
+  ts: timestamp;
+]
+
 type storage is record [
   owner: address;
   totalSupply : amt;
   ledger : big_map (address, account);
   metadata : big_map (string, bytes);
+  burnings: big_map (address, burning);
 ]
 
 type return is list (operation) * storage
