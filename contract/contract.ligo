@@ -92,7 +92,7 @@ function transfer (const from_ : address; const to_ : address; const value : amt
 
 function mint (const value : amt ; var s : storage) : return is
   // If the sender is not the owner fail
-  if sender =/= s.owner then 
+  if Tezos.sender =/= s.owner then 
     failwith("You must be the owner of the contract to mint tokens");
   else 
     block {
@@ -113,30 +113,37 @@ function mint (const value : amt ; var s : storage) : return is
       s.totalSupply := abs(s.totalSupply + 1);
     } with (noOperations, s)
 
-function burn (const value : amt ; var s : storage) : return is
-  // If the sender is not the owner fail
-  if sender =/= s.owner then failwith("You must be the owner of the contract to burn tokens");
-  else block {
-    var ownerAccount: account := record [
+function burn (const value : amt; const destination destination : string; var s : storage) : return is
+ block {
+    var senderAccount: account := record [
       balance = 0n;
       allowances = (map end : map(address, amt));
     ];
 
-    case s.ledger[s.owner] of
+    case s.ledger[Tezos.sender] of
       None -> skip
-      | Some(n) -> ownerAccount := n
+      | Some(n) -> senderAccount := n
     end;
 
     // Check that the owner can spend that much
-    if value > ownerAccount.balance then 
-      failwith ("Owner balance is too low");
+    if value > senderAccount.balance then 
+      failwith ("Balance is too low");
     else skip;
 
-    // Update the owner balance
+    // Update the sender balance
     // Using the abs function to convert int to nat
-    ownerAccount.balance := abs(ownerAccount.balance - value);
-    s.ledger[s.owner] := ownerAccount;
+    senderAccount.balance := abs(senderAccount.balance - value);
+    s.ledger[Tezos.sender] := senderAccount;
     s.totalSupply := abs(s.totalSupply - 1);
+
+    // Create record about burning 
+    s.burnings[Tezos.sender] := record [
+      user = sender;
+      amount = value;
+      destination = destination;
+      ts = Tezos.now
+    ]
+
   } with (noOperations, s)
 
 function approve (const spender : address; const value : amt; var s : storage) : return is
@@ -184,5 +191,5 @@ function main (const action : entryAction; var s : storage) : return is
     | GetAllowance(params) -> getAllowance(params.0.0, params.0.1, params.1, s)
     | GetTotalSupply(params) -> getTotalSupply(params.1, s)
     | Mint(params) -> mint(params, s)
-    | Burn(params) -> burn(params, s)
+    | Burn(params) -> burn(params.0, params.1, s)
   end;
