@@ -2,12 +2,10 @@
   "dependencies": {
     "@taquito/signer": "^11.2.0",
     "@taquito/taquito": "^11.2.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "minimist": "^1.2.5"
   },
   "devDependencies": {
     "typescript": "^4.5.5"
-  },
-  "scripts": {
-    "orginate": "ts-node orginate.ts"
   }
 }

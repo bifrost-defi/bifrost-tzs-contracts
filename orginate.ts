@@ -7,10 +7,21 @@ require("dotenv").config();
 const provider: string = process.env.RPC_URL || "";
 const pk: string = process.env.PRIVATE_KEY || "";
 
+const args = require("minimist")(process.argv.slice(2));
+
 async function deploy() {
   const tezos = new TezosToolkit(provider);
 
   await importKey(tezos, pk);
+
+  console.log(args);
+  if (!args["meta"] || args["meta"] === "") {
+    console.error("invalid metadata link bytes");
+    return;
+  }
+
+  const metadata = new MichelsonMap();
+  metadata.set("", args["meta"]);
 
   try {
     const op = await tezos.contract.originate({
@@ -19,7 +30,7 @@ async function deploy() {
         owner: process.env.OWNER,
         totalSupply: "0",
         ledger: new MichelsonMap(),
-        metadata: new MichelsonMap(),
+        metadata: metadata,
         burnings: new MichelsonMap(),
       },
     });
