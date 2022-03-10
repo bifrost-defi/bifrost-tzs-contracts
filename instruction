@@ -1,5 +1,0 @@
-sudo npm install --global yarn
-sudo npm install typescript --save-dev
-
-yarn add @taquito/taquito
-yarn add @taquito/signer
