@@ -1,7 +1,7 @@
 {
   "symbol": "WAVAX",
   "name": "Wrapped AVAX",
-  "decimals": "18",
-  "description": "Wrapped AVAX",
-  "interfaces": ["TZIP-007-2021-04-17", "TZIP-016-2021-04-17"]
+  "decimals": 18,
+  "description": "Bifrost wrapped AVAX",
+  "shouldPreferSymbol": true
 }
