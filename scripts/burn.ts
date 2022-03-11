@@ -5,25 +5,29 @@ require("dotenv").config();
 
 const provider: string = process.env.RPC_URL || "";
 const pk: string = process.env.PRIVATE_KEY || "";
-const lambda = process.env.LAMBDA_VIEW || undefined;
 
 const args = require("minimist")(process.argv.slice(2));
 
-async function mint() {
+async function burn() {
   const tezos = new TezosToolkit(provider);
   await importKey(tezos, pk);
-  const owner = await tezos.signer.publicKeyHash();
 
   const at: string = args["at"] || "";
+  const amount: string = args["amount"] || "";
+  const destination: string = args["dst"] || "";
 
   try {
     let contract = await tezos.contract.at(at);
-    let balance = await contract.views.getBalance(owner).read(lambda);
+    let op = await contract.methods.burn(amount, destination).send();
 
-    console.log(`Balance: ${balance}`);
+    console.log(`Waiting for ${op.hash} to be confirmed...`);
+
+    await op.confirmation(1);
+
+    console.log("Done");
   } catch (error) {
     console.error(error);
   }
 }
 
-mint();
+burn();

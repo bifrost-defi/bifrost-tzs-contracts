@@ -5,7 +5,6 @@ import fs from "fs";
 require("dotenv").config();
 
 const provider: string = process.env.RPC_URL || "";
-const owner: string = process.env.OWNER || "";
 const pk: string = process.env.PRIVATE_KEY || "";
 
 const args = require("minimist")(process.argv.slice(2));
@@ -14,6 +13,7 @@ async function deploy() {
   const tezos = new TezosToolkit(provider);
 
   await importKey(tezos, pk);
+  const owner = await tezos.signer.publicKeyHash();
 
   if (!args["meta"] || args["meta"] === "") {
     console.error("invalid metadata link bytes");
@@ -25,7 +25,7 @@ async function deploy() {
 
   try {
     const op = await tezos.contract.originate({
-      code: fs.readFileSync("../build/contract.tz").toString(),
+      code: fs.readFileSync("./build/contract.tz").toString(),
       storage: {
         owner: owner,
         totalSupply: "0",

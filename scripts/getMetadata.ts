@@ -1,29 +1,30 @@
 import { TezosToolkit, MichelsonMap } from "@taquito/taquito";
 import { importKey } from "@taquito/signer";
+import { Tzip16Module, tzip16 } from "@taquito/tzip16";
 
 require("dotenv").config();
 
 const provider: string = process.env.RPC_URL || "";
 const pk: string = process.env.PRIVATE_KEY || "";
-const lambda = process.env.LAMBDA_VIEW || undefined;
 
 const args = require("minimist")(process.argv.slice(2));
 
-async function mint() {
+async function burn() {
   const tezos = new TezosToolkit(provider);
   await importKey(tezos, pk);
-  const owner = await tezos.signer.publicKeyHash();
+
+  tezos.addExtension(new Tzip16Module());
 
   const at: string = args["at"] || "";
 
   try {
-    let contract = await tezos.contract.at(at);
-    let balance = await contract.views.getBalance(owner).read(lambda);
+    let contract = await tezos.contract.at(at, tzip16);
+    let metadata = await contract.tzip16().getMetadata();
 
-    console.log(`Balance: ${balance}`);
+    console.log(JSON.stringify(metadata, null, 2));
   } catch (error) {
     console.error(error);
   }
 }
 
-mint();
+burn();
