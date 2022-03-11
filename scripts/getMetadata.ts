@@ -1,6 +1,6 @@
 import { TezosToolkit, MichelsonMap } from "@taquito/taquito";
 import { importKey } from "@taquito/signer";
-import { Tzip16Module, tzip16 } from "@taquito/tzip16";
+import { Tzip12Module, tzip12 } from "@taquito/tzip12";
 
 require("dotenv").config();
 
@@ -13,13 +13,13 @@ async function burn() {
   const tezos = new TezosToolkit(provider);
   await importKey(tezos, pk);
 
-  tezos.addExtension(new Tzip16Module());
+  tezos.addExtension(new Tzip12Module());
 
   const at: string = args["at"] || "";
 
   try {
-    let contract = await tezos.contract.at(at, tzip16);
-    let metadata = await contract.tzip16().getMetadata();
+    let contract = await tezos.contract.at(at, tzip12);
+    let metadata = await contract.tzip12().getTokenMetadata(1);
 
     console.log(JSON.stringify(metadata, null, 2));
   } catch (error) {

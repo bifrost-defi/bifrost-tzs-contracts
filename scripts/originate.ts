@@ -20,8 +20,15 @@ async function deploy() {
     return;
   }
 
+  const token_id = 1;
+  const token_info = new MichelsonMap();
+  token_info.set("", args["meta"]);
+
   const metadata = new MichelsonMap();
-  metadata.set("", args["meta"]);
+  metadata.set("1", {
+    token_id,
+    token_info,
+  });
 
   try {
     const op = await tezos.contract.originate({
@@ -30,8 +37,8 @@ async function deploy() {
         owner: owner,
         totalSupply: "0",
         ledger: new MichelsonMap(),
-        metadata: metadata,
         burnings: new MichelsonMap(),
+        token_metadata: metadata,
       },
     });
 

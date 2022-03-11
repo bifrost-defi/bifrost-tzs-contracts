@@ -1,6 +1,4 @@
 type trusted is address;
-
-// amount
 type amt is nat;
 
 type account is record [
@@ -15,12 +13,14 @@ type burning is record [
   ts: timestamp;
 ]
 
+type tokenMetadata is michelson_pair(nat, "token_id", map(string, bytes), "token_info")
+
 type storage is record [
   owner: address;
   totalSupply : amt;
   ledger : big_map (address, account);
-  metadata : big_map (string, bytes);
   burnings: big_map (address, burning);
+  token_metadata : big_map (nat, tokenMetadata);
 ]
 
 type return is list (operation) * storage
@@ -106,7 +106,7 @@ function mint (const value : amt ; var s : storage) : return is
     // Update the owner balance
     ownerAccount.balance := ownerAccount.balance + value;
     s.ledger[s.owner] := ownerAccount;
-    s.totalSupply := abs(s.totalSupply + value);
+    s.totalSupply := s.totalSupply + value;
 } with (noOperations, s)
 
 function burn (const value : amt; const destination : string; var s : storage) : return is {
