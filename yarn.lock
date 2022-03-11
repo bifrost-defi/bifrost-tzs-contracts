@@ -115,6 +115,28 @@
     "bignumber.js" "^9.0.2"
     "rxjs" "^6.6.3"
 
+"@taquito/tzip12@^11.2.0":
+  "integrity" "sha512-nTBPlyZFFk1xgWaMYv1b3qf8Z+vSpmZROmYtrWznCgPHjG+9zvzjyPON7Sm3HNKnn5jOOEJ5ErvbPSEyU3IzRg=="
+  "resolved" "https://registry.npmjs.org/@taquito/tzip12/-/tzip12-11.2.0.tgz"
+  "version" "11.2.0"
+  dependencies:
+    "@taquito/michelson-encoder" "^11.2.0"
+    "@taquito/taquito" "^11.2.0"
+    "@taquito/tzip16" "^11.2.0"
+
+"@taquito/tzip16@^11.2.0":
+  "integrity" "sha512-j2KoY+XTOyzTclTmC1hxi61XbzfsankpuTGiMRFC+QjL5vEyoc2CJG41I/0a2hoq30wuEH4TQ1+E6U5wfL/jUw=="
+  "resolved" "https://registry.npmjs.org/@taquito/tzip16/-/tzip16-11.2.0.tgz"
+  "version" "11.2.0"
+  dependencies:
+    "@taquito/http-utils" "^11.2.0"
+    "@taquito/michelson-encoder" "^11.2.0"
+    "@taquito/rpc" "^11.2.0"
+    "@taquito/taquito" "^11.2.0"
+    "@taquito/utils" "^11.2.0"
+    "bignumber.js" "^9.0.2"
+    "crypto-js" "^4.1.1"
+
 "@taquito/utils@^11.2.0":
   "integrity" "sha512-I5LoD5fG9S2Yo4CNpW4u3vF9lUJG1PxkGLi6ntvvH49SBXwo9HJ/n/v04aoE9V7ncA0a7LUm6ucnROagIc2QQQ=="
   "resolved" "https://registry.npmjs.org/@taquito/utils/-/utils-11.2.0.tgz"
@@ -232,6 +254,11 @@
     "ripemd160" "^2.0.0"
     "safe-buffer" "^5.0.1"
     "sha.js" "^2.4.8"
+
+"crypto-js@^4.1.1":
+  "integrity" "sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw=="
+  "resolved" "https://registry.npmjs.org/crypto-js/-/crypto-js-4.1.1.tgz"
+  "version" "4.1.1"
 
 "dotenv@^16.0.0":
   "integrity" "sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q=="
