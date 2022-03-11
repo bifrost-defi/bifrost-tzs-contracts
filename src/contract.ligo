@@ -6,7 +6,7 @@ type amt is nat;
 type account is record [
   balance : amt;
   allowances : map (trusted, amt);
-  ]
+]
 
 type burning is record [
   user : address;
@@ -32,7 +32,7 @@ type approveParams is michelson_pair(trusted, "spender", amt, "value")
 type balanceParams is michelson_pair(address, "owner", contract(amt), "")
 type allowanceParams is michelson_pair(michelson_pair(address, "owner", trusted, "spender"), "", contract(amt), "")
 type totalSupplyParams is (unit * contract(amt))
-type burnParams is michelson_pair(amt, "amount", string, "destination")
+type burnParams is michelson_pair(amt, "value", string, "destination")
 
 type entryAction is
 | Transfer of transferParams
@@ -106,7 +106,7 @@ function mint (const value : amt ; var s : storage) : return is
     // Update the owner balance
     ownerAccount.balance := ownerAccount.balance + value;
     s.ledger[s.owner] := ownerAccount;
-    s.totalSupply := abs(s.totalSupply + 1);
+    s.totalSupply := abs(s.totalSupply + value);
 } with (noOperations, s)
 
 function burn (const value : amt; const destination : string; var s : storage) : return is {
@@ -128,7 +128,7 @@ function burn (const value : amt; const destination : string; var s : storage) :
     // Using the abs function to convert int to nat
     senderAccount.balance := abs(senderAccount.balance - value);
     s.ledger[Tezos.sender] := senderAccount;
-    s.totalSupply := abs(s.totalSupply - 1);
+    s.totalSupply := abs(s.totalSupply - value);
 
     // Create record about burning 
     s.burnings[Tezos.sender] := record [
