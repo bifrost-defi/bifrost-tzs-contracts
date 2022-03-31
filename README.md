@@ -20,7 +20,7 @@ RPC_URL=
 PRIVATE_KEY=
 ```
 
-Origignate lambda view contract:
+Originate lambda view contract:
 ```
 $ make originate.lambda
 ```
@@ -63,7 +63,7 @@ mint (mints token).
 $ ts-node scripts/mint.ts --at=<CONTRACT_ADDRESS> --amount=<AMOUNT>
 ```
 
-originate (originate token contract with metadata).
+originate (originates token contract with metadata).
 ```
 $ ts-node scripts/originate.ts --meta=<METADATA_URL_BYTES>
 ```
