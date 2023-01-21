@@ -1,0 +1,1 @@
+type amt is nat;

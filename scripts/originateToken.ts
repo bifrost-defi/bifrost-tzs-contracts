@@ -32,7 +32,7 @@ async function deploy() {
 
   try {
     const op = await tezos.contract.originate({
-      code: fs.readFileSync("./build/contract.tz").toString(),
+      code: fs.readFileSync("./build/wrapped-swap/token.tz").toString(),
       storage: {
         owner: owner,
         totalSupply: "0",
