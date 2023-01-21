@@ -1,0 +1,7 @@
+{
+  "symbol": "bETH",
+  "name": "Wrapped ETH",
+  "decimals": 18,
+  "description": "Bifrost wrapped ETH",
+  "shouldPreferSymbol": true
+}

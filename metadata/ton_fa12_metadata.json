@@ -1,0 +1,7 @@
+{
+  "symbol": "bTON",
+  "name": "Wrapped TON",
+  "decimals": 9,
+  "description": "Bifrost wrapped TON",
+  "shouldPreferSymbol": true
+}

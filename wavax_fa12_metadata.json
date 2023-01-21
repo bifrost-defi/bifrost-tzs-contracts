@@ -1,7 +1,0 @@
-{
-  "symbol": "WAVAX",
-  "name": "Wrapped AVAX",
-  "decimals": 18,
-  "description": "Bifrost wrapped AVAX",
-  "shouldPreferSymbol": true
-}

@@ -1,7 +1,0 @@
-{
-  "symbol": "WUSDC",
-  "name": "Wrapped USDC",
-  "decimals": 18,
-  "description": "Bifrost wrapped USDC",
-  "shouldPreferSymbol": true
-}
