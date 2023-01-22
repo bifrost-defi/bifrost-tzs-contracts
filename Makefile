@@ -9,9 +9,11 @@ compile.prepare:
 
 compile.json: compile.prepare
 	@$(LIGO) compile contract -o build/wrapped-swap/token.json --michelson-format json ./src/wrapped-swap/token.ligo
+	@$(LIGO) compile contract -o build/wrapped-swap/bridge.json --michelson-format json ./src/wrapped-swap/bridge.ligo
 
 compile.tz: compile.prepare
 	@$(LIGO) compile contract --o build/wrapped-swap/token.tz ./src/wrapped-swap/token.ligo
+	@$(LIGO) compile contract --o build/wrapped-swap/bridge.tz ./src/wrapped-swap/bridge.ligo
 
 originate.beth:
 	@ts-node scripts/originateToken.ts --meta=$(bETH_METADATA_HEX_LINK)
