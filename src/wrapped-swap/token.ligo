@@ -6,20 +6,13 @@ type account is record [
   allowances : map (trusted, amt);
 ]
 
-type burning is record [
-  user : address;
-  amount: amt;
-  destination: string;
-  ts: timestamp;
-]
-
 type tokenMetadata is michelson_pair(nat, "token_id", map(string, bytes), "token_info")
 
 type storage is record [
-  owner: address;
+  owner : address;
+  bridge : address;
   totalSupply : amt;
   ledger : big_map (address, account);
-  burnings: big_map (address, burning);
   token_metadata : big_map (nat, tokenMetadata);
 ]
 
@@ -129,15 +122,6 @@ function burn (const value : amt; const destination : string; var s : storage) :
     senderAccount.balance := abs(senderAccount.balance - value);
     s.ledger[Tezos.sender] := senderAccount;
     s.totalSupply := abs(s.totalSupply - value);
-
-    // Create record about burning 
-    s.burnings[Tezos.sender] := record [
-      user = sender;
-      amount = value;
-      destination = destination;
-      ts = Tezos.now
-    ]
-
   } with (noOperations, s)
 
 function approve (const spender : address; const value : amt; var s : storage) : return is {
