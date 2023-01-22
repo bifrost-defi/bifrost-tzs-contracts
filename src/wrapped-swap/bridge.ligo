@@ -41,6 +41,9 @@ type entryAction is
   | AddToken of addTokenParams
 
 function lock (const destAddress : string; const destCoinId : coinId; var s : storage) : return is {
+  if Tezos.amount = 0tez then
+    failwith ("Amount must be greater than 0");
+
   s.lockEvents[Tezos.sender] := record [
     user = Tezos.sender;
     amount = Tezos.amount;
@@ -50,7 +53,7 @@ function lock (const destAddress : string; const destCoinId : coinId; var s : st
   ];
 } with (noOperations, s)
 
-function unlock (const user : address; const amount : nat; var s : storage) : return is {
+function unlock (const user : address; const amount_ : nat; var s : storage) : return is {
   const is_oracle : bool = case s.oracles[Tezos.sender] of [
       Some (is_oracle) -> is_oracle
     | None -> False
@@ -65,7 +68,7 @@ function unlock (const user : address; const amount : nat; var s : storage) : re
       | None -> (failwith ("Wallet not found") : contract (unit))
   ];
 
-  const op : operation = Tezos.transaction (unit, amount, destination);
+  const op : operation = Tezos.transaction (unit, amount_ * 1mutez, destination);
 } with (list [op], s)
 
 function notifyBurn (const user : address; const coinAmount : nat; const destAddress: string; var s : storage) : return is {
