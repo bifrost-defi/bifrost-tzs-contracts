@@ -1,6 +1,6 @@
 # The Bifrost ligo contracts
 
-WARNING: Bridge is still under development. Do not send your assets to any of the addresses
+_WARNING: Bridge is still under development. Do not send your assets to any of the addresses_
 
 The Bifrost bridge allows you to swap assets across blockchains. In the first phase, the swap is based on the wrapped assets.
 
