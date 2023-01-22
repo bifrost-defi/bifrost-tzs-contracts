@@ -25,7 +25,7 @@ type approveParams is michelson_pair(trusted, "spender", amt, "value")
 type balanceParams is michelson_pair(address, "owner", contract(amt), "")
 type allowanceParams is michelson_pair(michelson_pair(address, "owner", trusted, "spender"), "", contract(amt), "")
 type totalSupplyParams is (unit * contract(amt))
-type mintParams is michelson_pair(address, "to", amt, "value")
+type mintParams is michelson_pair(address, "to_", amt, "value")
 type burnParams is michelson_pair(amt, "value", string, "destination")
 
 type entryAction is
