@@ -1,4 +1,5 @@
-LIGO = docker run --rm -v "$(shell pwd)":"$(shell pwd)" -w "$(shell pwd)" ligolang/ligo:0.37.0
+LIGO_VERSION = 0.60.0
+LIGO = docker run --rm -v "$(shell pwd)":"$(shell pwd)" -w "$(shell pwd)" ligolang/ligo:$(LIGO_VERSION)
 
 # Metadata links encoded in hex
 bETH_METADATA_HEX_LINK = 68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f626966726f73742d646566692f626966726f73742d747a732d636f6e7472616374732f6d61696e2f6d657461646174612f6574685f666131325f6d657461646174612e6a736f6e
