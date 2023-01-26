@@ -61,21 +61,21 @@ function getAllowance (const ownerAccount : account; const spender : address; co
   ]
 
 function transfer (const from_ : address; const to_ : address; const value : amt; var s : storage) : return is {
-  var senderAccount : account := getAccount(from_, s);
+  var senderAccount : account := getAccount (from_, s);
 
   if senderAccount.balance < value then
     failwith("Source balance is too low");
 
-  if from_ =/= Tezos.sender then block {
-    const spenderAllowance : amt = getAllowance(senderAccount, Tezos.sender, s);
+  if from_ =/= Tezos.get_sender () then block {
+    const spenderAllowance : amt = getAllowance (senderAccount, Tezos.get_sender (), s);
 
     if spenderAllowance < value then
       failwith("NotEnoughAllowance");
 
-    senderAccount.allowances[Tezos.sender] := abs(spenderAllowance - value);
+    senderAccount.allowances[Tezos.get_sender ()] := abs (spenderAllowance - value);
   } else skip;
 
-  senderAccount.balance := abs(senderAccount.balance - value);
+  senderAccount.balance := abs (senderAccount.balance - value);
 
   s.ledger[from_] := senderAccount;
 
@@ -86,7 +86,7 @@ function transfer (const from_ : address; const to_ : address; const value : amt
 
 function mint (const to_ : address; const value : amt; var s : storage) : return is
    // If the sender is not the bridge fail
-  if Tezos.sender =/= s.bridge then 
+  if Tezos.get_sender () =/= s.bridge then 
     failwith("Only the bridge can mint tokens")
   else {
     var dst: account := getAccount(to_, s);
@@ -98,7 +98,7 @@ function mint (const to_ : address; const value : amt; var s : storage) : return
   } with (noOperations, s)
 
 function burn (const value : amt; const destination : string; var s : storage) : return is {
-  var senderAccount: account := getAccount(Tezos.sender, s);
+  var senderAccount: account := getAccount(Tezos.get_sender (), s);
 
   // Check that the owner can spend that much
   if value > senderAccount.balance then 
@@ -107,7 +107,7 @@ function burn (const value : amt; const destination : string; var s : storage) :
   // Update the sender balance
   // Using the abs function to convert int to nat
   senderAccount.balance := abs(senderAccount.balance - value);
-  s.ledger[Tezos.sender] := senderAccount;
+  s.ledger[Tezos.get_sender ()] := senderAccount;
   s.totalSupply := abs(s.totalSupply - value);
 
   // Send notification to the bridge contract
@@ -116,12 +116,12 @@ function burn (const value : amt; const destination : string; var s : storage) :
       Some (contract) -> contract
       | None -> failwith("Bridge contract not found")
     ];
-  const params : notifyBurnParams = (Tezos.sender, (value, destination));
+  const params : notifyBurnParams = (Tezos.get_sender (), (value, destination));
   const op : operation = Tezos.transaction (NotifyBurn(params), 0tz, bridge);
 } with (list [op], s)
 
 function approve (const spender : address; const value : amt; var s : storage) : return is {
-  var senderAccount : account := getAccount(Tezos.sender, s);
+  var senderAccount : account := getAccount(Tezos.get_sender (), s);
   const spenderAllowance : amt = getAllowance(senderAccount, spender, s);
 
   if spenderAllowance > 0n and value > 0n then
@@ -129,20 +129,20 @@ function approve (const spender : address; const value : amt; var s : storage) :
 
   senderAccount.allowances[spender] := value;
 
-  s.ledger[Tezos.sender] := senderAccount;
+  s.ledger[Tezos.get_sender ()] := senderAccount;
 } with (noOperations, s)
 
 function getBalance (const owner : address; const contr : contract(amt); var s : storage) : return is {
   const ownerAccount : account = getAccount(owner, s);
-} with (list [transaction(ownerAccount.balance, 0tz, contr)], s)
+} with (list [Tezos.transaction (ownerAccount.balance, 0tz, contr)], s)
 
 function getAllowance (const owner : address; const spender : address; const contr : contract(amt); var s : storage) : return is {
   const ownerAccount : account = getAccount(owner, s);
   const spenderAllowance : amt = getAllowance(ownerAccount, spender, s);
-} with (list [transaction(spenderAllowance, 0tz, contr)], s)
+} with (list [Tezos.transaction (spenderAllowance, 0tz, contr)], s)
 
 function getTotalSupply (const contr : contract(amt); var s : storage) : return is
-  (list [transaction(s.totalSupply, 0tz, contr)], s)
+  (list [Tezos.transaction (s.totalSupply, 0tz, contr)], s)
 
 function main (const action : entryAction; var s : storage) : return is
   case action of [

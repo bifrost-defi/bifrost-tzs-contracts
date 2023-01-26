@@ -21,9 +21,11 @@ type storage is record [
   owner : address;
   oracles : map (address, bool);
   tokens : map (coinId, address); 
-  lockEvents : big_map (address, lockEvent);
-  burnEvents : big_map (address, burnEvent);
 ]
+
+type event is
+  | LockEvent of lockEvent
+  | BurnEvent of burnEvent
 
 type return is list (operation) * storage
 
@@ -41,20 +43,20 @@ type entryAction is
   | AddToken of addTokenParams
 
 function lock (const destAddress : string; const destCoinId : coinId; var s : storage) : return is {
-  if Tezos.amount = 0tez then
+  if Tezos.get_amount () = 0tez then
     failwith ("Amount must be greater than 0");
 
-  s.lockEvents[Tezos.sender] := record [
-    user = Tezos.sender;
-    amount = Tezos.amount;
+  const op : operation = Tezos.emit ("%lock", LockEvent(record [
+    user = Tezos.get_sender ();
+    amount = Tezos.get_amount ();
     destAddress = destAddress;
     destCoinId = destCoinId;
-    ts = Tezos.now;
-  ];
-} with (noOperations, s)
+    ts = Tezos.get_now ();
+  ]));
+} with (list [op], s)
 
 function unlock (const user : address; const amount_ : nat; var s : storage) : return is {
-  const is_oracle : bool = case s.oracles[Tezos.sender] of [
+  const is_oracle : bool = case s.oracles[Tezos.get_sender ()] of [
       Some (is_oracle) -> is_oracle
     | None -> False
   ];
@@ -75,21 +77,21 @@ function notifyBurn (const user : address; const coinAmount : nat; const destAdd
   var burnedCoinId : coinId := -1;
 
   for k -> v in map s.tokens {
-    if Tezos.sender = v then
+    if Tezos.get_sender () = v then
       burnedCoinId := k;
   };
 
   if burnedCoinId = -1 then
-    failwith ("Sender is unknown token");
+    failwith ("get_sender () is unknown token");
 
-  s.burnEvents[user] := record [
+  const op : operation = Tezos.emit ("%burn", BurnEvent (record [
     user = user;
     amount = coinAmount;
     destAddress = destAddress;
     destCoinId = burnedCoinId;
-    ts = Tezos.now;
-  ];
-} with (noOperations, s)
+    ts = Tezos.get_now ();
+  ]));
+} with (list [op], s)
 
 function addToken (const coinId : coinId; const tokenAddress : address; var s : storage) : return is {
   const token_exists : bool = case s.tokens[coinId] of [
