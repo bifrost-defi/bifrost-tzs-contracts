@@ -82,7 +82,7 @@ function notifyBurn (const user : address; const coinAmount : nat; const destAdd
   };
 
   if burnedCoinId = -1 then
-    failwith ("get_sender () is unknown token");
+    failwith ("Sender is unknown token");
 
   const op : operation = Tezos.emit ("%burn", BurnEvent (record [
     user = user;
