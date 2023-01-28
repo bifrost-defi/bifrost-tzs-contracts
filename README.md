@@ -46,8 +46,8 @@ $ make compile.tz
 Originate tokens:
 
 ```
-$ make originate.wavax
-$ make originate.wusdc
+$ make originate.beth
+$ make originate.bton
 ```
 
 Run scripts:
@@ -82,10 +82,10 @@ mint (mints token).
 $ ts-node scripts/mint.ts --at=<CONTRACT_ADDRESS> --amount=<AMOUNT>
 ```
 
-originate (originates token contract with metadata).
+originate token (originates token contract with metadata).
 
 ```
-$ ts-node scripts/originate.ts --meta=<METADATA_URL_BYTES>
+$ ts-node scripts/originateToken.ts --meta=<METADATA_URL_BYTES>
 ```
 
 originateLambda (originate lambda view contract and outputs its address).
