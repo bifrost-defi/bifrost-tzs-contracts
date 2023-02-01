@@ -6,9 +6,6 @@ require("dotenv").config();
 
 const provider: string = process.env.RPC_URL || "";
 const pk: string = process.env.PRIVATE_KEY || "";
-const bridgeAddress: string = process.env.BRIDGE_ADDRESS || "";
-
-const args = require("minimist")(process.argv.slice(2));
 
 async function deploy() {
   const tezos = new TezosToolkit(provider);
@@ -16,30 +13,13 @@ async function deploy() {
   await importKey(tezos, pk);
   const owner = await tezos.signer.publicKeyHash();
 
-  if (!args["meta"] || args["meta"] === "") {
-    console.error("invalid metadata link bytes");
-    return;
-  }
-
-  const token_id = 1;
-  const token_info = new MichelsonMap();
-  token_info.set("", args["meta"]);
-
-  const metadata = new MichelsonMap();
-  metadata.set("1", {
-    token_id,
-    token_info,
-  });
-
   try {
     const op = await tezos.contract.originate({
-      code: fs.readFileSync("./build/wrapped-swap/token.tz").toString(),
+      code: fs.readFileSync("./build/wrapped-swap/bridge.tz").toString(),
       storage: {
         owner: owner,
-        bridge: bridgeAddress,
-        totalSupply: "0",
-        ledger: new MichelsonMap(),
-        token_metadata: metadata,
+        oracles: new MichelsonMap(),
+        tokens: new MichelsonMap(),
       },
     });
 
