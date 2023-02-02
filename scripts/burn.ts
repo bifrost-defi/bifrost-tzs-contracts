@@ -1,4 +1,4 @@
-import { TezosToolkit, MichelsonMap } from "@taquito/taquito";
+import { TezosToolkit } from "@taquito/taquito";
 import { importKey } from "@taquito/signer";
 
 require("dotenv").config();
