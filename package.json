@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@taquito/signer": "^11.2.0",
-    "@taquito/taquito": "^11.2.0",
-    "@taquito/tzip12": "^11.2.0",
-    "@taquito/tzip16": "^11.2.0",
+    "@taquito/signer": "^15.1.0",
+    "@taquito/taquito": "^15.1.0",
+    "@taquito/tzip12": "^15.1.0",
+    "@taquito/tzip16": "^15.1.0",
     "dotenv": "^16.0.0",
     "minimist": "^1.2.5"
   },
