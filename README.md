@@ -14,7 +14,7 @@ The Bifrost bridge allows you to swap assets across blockchains. In the first ph
 Run sandbox:
 
 ```shell
-$ image=oxheadalpha/flextesa:latest script=kathmandubox \
+$ image=oxheadalpha/flextesa:latest script=limabox \
 docker run --rm --name my-sandbox --detach -p 20000:20000 \
        -e block_time=3 \
        "$image" "$script" start
