@@ -26,21 +26,16 @@ type balanceParams is michelson_pair(address, "owner", contract(amt), "")
 type allowanceParams is michelson_pair(michelson_pair(address, "owner", trusted, "spender"), "", contract(amt), "")
 type totalSupplyParams is (unit * contract(amt))
 type mintParams is michelson_pair(address, "to_", amt, "value")
-type burnParams is michelson_pair(amt, "value", string, "destination")
+type burnParams is michelson_pair(address, "from_", amt, "value")
 
 type entryAction is
-| Transfer of transferParams
-| Approve of approveParams
-| GetBalance of balanceParams
-| GetAllowance of allowanceParams
-| GetTotalSupply of totalSupplyParams
-| Mint of mintParams
-| Burn of burnParams
-
-type notifyBurnParams is michelson_pair(address, "user", michelson_pair(amt, "coinAmount", string, "destAddress"), "")
-
-type bridgeAction is
-  | NotifyBurn of notifyBurnParams
+  | Transfer of transferParams
+  | Approve of approveParams
+  | GetBalance of balanceParams
+  | GetAllowance of allowanceParams
+  | GetTotalSupply of totalSupplyParams
+  | Mint of mintParams
+  | Burn of burnParams
 
 function getAccount (const addr : address; const s : storage) : account is {
   var acct : account :=
@@ -85,7 +80,7 @@ function transfer (const from_ : address; const to_ : address; const value : amt
 } with (noOperations, s)
 
 function mint (const to_ : address; const value : amt; var s : storage) : return is
-   // If the sender is not the bridge fail
+  // If the sender is not the bridge fail
   if Tezos.get_sender () =/= s.bridge then 
     failwith("Only the bridge can mint tokens")
   else {
@@ -97,28 +92,23 @@ function mint (const to_ : address; const value : amt; var s : storage) : return
     s.totalSupply := s.totalSupply + value;
   } with (noOperations, s)
 
-function burn (const value : amt; const destination : string; var s : storage) : return is {
-  var senderAccount: account := getAccount(Tezos.get_sender (), s);
+function burn (const from_ : address; const value : amt; var s : storage) : return is {
+  // If the sender is not the bridge fail
+  if Tezos.get_sender () =/= s.bridge then 
+    failwith("Only the bridge can mint tokens");
+
+  var acc: account := getAccount(from_, s);
 
   // Check that the owner can spend that much
-  if value > senderAccount.balance then 
+  if value > acc.balance then 
     failwith("Balance is too low");
 
   // Update the sender balance
   // Using the abs function to convert int to nat
-  senderAccount.balance := abs(senderAccount.balance - value);
-  s.ledger[Tezos.get_sender ()] := senderAccount;
+  acc.balance := abs(acc.balance - value);
+  s.ledger[Tezos.get_sender ()] := acc;
   s.totalSupply := abs(s.totalSupply - value);
-
-  // Send notification to the bridge contract
-  const bridge : contract (bridgeAction) = 
-    case (Tezos.get_contract_opt(s.bridge) : option (contract (bridgeAction))) of [
-      Some (contract) -> contract
-      | None -> failwith("Bridge contract not found")
-    ];
-  const params : notifyBurnParams = (Tezos.get_sender (), (value, destination));
-  const op : operation = Tezos.transaction (NotifyBurn(params), 0tz, bridge);
-} with (list [op], s)
+} with (noOperations, s)
 
 function approve (const spender : address; const value : amt; var s : storage) : return is {
   var senderAccount : account := getAccount(Tezos.get_sender (), s);
