@@ -6,8 +6,8 @@ The Bifrost bridge allows you to swap assets across blockchains. In the first ph
 
 ## Contracts for other networks:
 
-- [EVM-based](https://github.com/bifrost-defi/bifrost-solidity-contracts)
-- [TON](https://github.com/bifrost-defi/bifrost-ton-contracts)
+- [EVM-based](https://github.com/synswap-labs/solidity-contracts)
+- [TON](https://github.com/synswap-labs/ton-contracts)
 
 ## Deploy to sandbox
 
